@@ -5,7 +5,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import static java.util.stream.Collectors.toList;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.*;
 
 public class ReportGenerator {
 
@@ -17,29 +21,32 @@ public class ReportGenerator {
     }
 
     public List<DiecastModel> findAllChampions(List<DiecastModel> diecastModels) {
-        List<DiecastModel> diecastModelsByCountry = new ArrayList<>();
-        for (DiecastModel diecastModel : diecastModels) {
-            if (diecastModel.getConstructorChampion() || diecastModel.getDriverChampion()) {
-                diecastModelsByCountry.add(diecastModel);
-            }
-        }
-        return diecastModelsByCountry;
+
+
+        return diecastModels.stream()
+                .filter(i -> i.getConstructorChampion() || i.getDriverChampion())
+                .collect(Collectors.toList());
     }
 
     public Double sumTotalPrices(List<DiecastModel> diecastModels) {
-        Double totalSum = 0.;
-
-        for (DiecastModel diecastModel : diecastModels) {
-            totalSum += diecastModel.getPrice();
-        }
-
+        Double totalSum = diecastModels
+                .stream()
+                .map(diecastModel -> diecastModel.getPrice())
+                .reduce(0., Double::sum);
+        
         return totalSum;
     }
 
     public Map<Team, List<DiecastModel>> groupAllByTeam(List<DiecastModel> diecastModels) {
-        Map<Team, List<DiecastModel>> diecastsByTeam = new HashMap<>();
 
-        for (DiecastModel diecastModel : diecastModels) {
+
+        Map<Team, List<DiecastModel>> diecastsByTeam = diecastModels.stream()
+                .collect(groupingBy(diecastModel -> diecastModel.getTeam()));
+
+
+
+        //Map<Team, List<DiecastModel>> diecastsByTeam = new HashMap<>();
+       /* for (DiecastModel diecastModel : diecastModels) {
             Team team = diecastModel.getTeam();
             List<DiecastModel> diecastsFromSameTeam = diecastsByTeam.get(team);
             if (diecastsFromSameTeam == null) {
@@ -47,7 +54,7 @@ public class ReportGenerator {
             }
             diecastsFromSameTeam.add(diecastModel);
             diecastsByTeam.put(team, diecastsFromSameTeam);
-        }
+        }*/
 
         return diecastsByTeam;
     }
